@@ -1,0 +1,136 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #1a1a2e;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.calculator {
+  width: 320px;
+  background: #16213e;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.display {
+  background: #0f3460;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.display-expression {
+  color: #8899aa;
+  font-size: 14px;
+  min-height: 20px;
+  word-break: break-all;
+}
+
+.display-current {
+  color: #e4e4e4;
+  font-size: 36px;
+  font-weight: 300;
+  word-break: break-all;
+  max-width: 100%;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.btn {
+  padding: 18px;
+  font-size: 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+.btn-number {
+  background: #1a1a3e;
+  color: #e4e4e4;
+}
+
+.btn-number:hover {
+  background: #242450;
+}
+
+.btn-operator {
+  background: #533483;
+  color: #e4e4e4;
+}
+
+.btn-operator:hover {
+  background: #6a42a0;
+}
+
+.btn-clear {
+  background: #e94560;
+  color: #fff;
+}
+
+.btn-clear:hover {
+  background: #ff5a75;
+}
+
+.btn-backspace {
+  background: #e94560;
+  color: #fff;
+}
+
+.btn-backspace:hover {
+  background: #ff5a75;
+}
+
+.btn-equals {
+  background: #533483;
+  color: #fff;
+  grid-column: span 2;
+}
+
+.btn-equals:hover {
+  background: #6a42a0;
+}
+
+.btn-zero {
+  /* same size as other buttons in 4-col grid */
+}
+
+@media (max-width: 400px) {
+  .calculator {
+    width: 95vw;
+    padding: 14px;
+  }
+
+  .btn {
+    padding: 15px;
+    font-size: 18px;
+  }
+
+  .display-current {
+    font-size: 28px;
+  }
+}
