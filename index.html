@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+  .calculator{width:340px;background:#16213e;border-radius:20px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .display{background:#0f3460;border-radius:14px;padding:20px;margin-bottom:20px;text-align:right;min-height:100px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+  .expression{color:#8899aa;font-size:16px;min-height:22px;word-break:break-all}
+  .current{color:#e4e4e4;font-size:40px;font-weight:300;word-break:break-all;line-height:1.2;margin-top:6px}
+  .buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  button{border:none;border-radius:12px;font-size:20px;padding:18px 0;cursor:pointer;transition:background .15s,transform .1s;font-family:inherit;font-weight:500;-webkit-tap-highlight-color:transparent;user-select:none}
+  button:active{transform:scale(.95)}
+  .btn-num{background:#1a1a40;color:#e4e4e4}
+  .btn-num:hover{background:#252550}
+  .btn-op{background:#e94560;color:#fff}
+  .btn-op:hover{background:#ff6b81}
+  .btn-fn{background:#0f3460;color:#8899cc}
+  .btn-fn:hover{background:#154080}
+  .btn-eq{background:#53d769;color:#fff}
+  .btn-eq:hover{background:#6ae87f}
+  .btn-zero{grid-column:span 2}
+  @media(max-width:380px){.calculator{width:calc(100vw - 32px);padding:16px}.current{font-size:32px}button{padding:15px 0;font-size:18px}}
+</style>
+</head>
+<body>
+<div class="calculator">
+  <div class="display">
+    <div class="expression" id="expression"></div>
+    <div class="current" id="display">0</div>
+  </div>
+  <div class="buttons">
+    <button class="btn-fn" data-action="clear">AC</button>
+    <button class="btn-fn" data-action="delete">&#9003;</button>
+    <button class="btn-fn" data-action="percent">%</button>
+    <button class="btn-op" data-action="op" data-value="/">÷</button>
+    <button class="btn-num" data-action="digit" data-value="7">7</button>
+    <button class="btn-num" data-action="digit" data-value="8">8</button>
+    <button class="btn-num" data-action="digit" data-value="9">9</button>
+    <button class="btn-op" data-action="op" data-value="*">×</button>
+    <button class="btn-num" data-action="digit" data-value="4">4</button>
+    <button class="btn-num" data-action="digit" data-value="5">5</button>
+    <button class="btn-num" data-action="digit" data-value="6">6</button>
+    <button class="btn-op" data-action="op" data-value="-">−</button>
+    <button class="btn-num" data-action="digit" data-value="1">1</button>
+    <button class="btn-num" data-action="digit" data-value="2">2</button>
+    <button class="btn-num" data-action="digit" data-value="3">3</button>
+    <button class="btn-op" data-action="op" data-value="+">+</button>
+    <button class="btn-num btn-zero" data-action="digit" data-value="0">0</button>
+    <button class="btn-num" data-action="digit" data-value=".">.</button>
+    <button class="btn-eq" data-action="equals">=</button>
+  </div>
+</div>
+<script>
+(function(){
+  const display=document.getElementById('display');
+  const expression=document.getElementById('expression');
+  let current='0',prev='',operator='',resetNext=false;
+
+  function formatDisplay(val){
+    if(val==='Error')return val;
+    const num=parseFloat(val);
+    if(isNaN(num))return val;
+    if(val.endsWith('.'))return val;
+    if(val.includes('.')&&val.endsWith('0')&&!resetNext)return val;
+    if(Math.abs(num)>=1e12)return num.toExponential(6);
+    return val;
+  }
+
+  function updateDisplay(){display.textContent=formatDisplay(current)}
+
+  function opSymbol(op){return{'/':'÷','*':'×','-':'−','+':'+'}[op]||op}
+
+  function inputDigit(d){
+    if(current==='Error')clear();
+    if(resetNext){current=d==='.'?'0.':d;resetNext=false;}
+    else if(d==='.'){if(!current.includes('.'))current+='.';}
+    else if(current==='0'){current=d;}
+    else{if(current.replace(/[^0-9]/g,'').length>=15)return;current+=d;}
+    updateDisplay();
+  }
+
+  function handleOp(nextOp){
+    if(current==='Error')return;
+    const val=parseFloat(current);
+    if(prev!==''&&operator&&!resetNext){
+      const result=calculate(parseFloat(prev),val,operator);
+      if(result==='Error'){current='Error';prev='';operator='';expression.textContent='';updateDisplay();return;}
+      current=String(result);prev=current;
+    }else{prev=current;}
+    operator=nextOp;
+    expression.textContent=formatDisplay(prev)+' '+opSymbol(operator);
+    resetNext=true;
+    updateDisplay();
+  }
+
+  function calculate(a,b,op){
+    let r;
+    switch(op){
+      case'+':r=a+b;break;
+      case'-':r=a-b;break;
+      case'*':r=a*b;break;
+      case'/':if(b===0)return'Error';r=a/b;break;
+      default:return b;
+    }
+    return parseFloat(r.toPrecision(12));
+  }
+
+  function equals(){
+    if(current==='Error')return;
+    if(operator&&prev!==''){
+      const a=parseFloat(prev),b=parseFloat(current);
+      expression.textContent=formatDisplay(prev)+' '+opSymbol(operator)+' '+formatDisplay(current)+' =';
+      const result=calculate(a,b,operator);
+      current=result==='Error'?'Error':String(result);
+      prev='';operator='';resetNext=true;
+      updateDisplay();
+    }
+  }
+
+  function clear(){current='0';prev='';operator='';resetNext=false;expression.textContent='';updateDisplay();}
+
+  function del(){
+    if(current==='Error'||resetNext){clear();return;}
+    current=current.length>1?current.slice(0,-1):'0';
+    updateDisplay();
+  }
+
+  function percent(){
+    if(current==='Error')return;
+    current=String(parseFloat(current)/100);
+    updateDisplay();
+  }
+
+  document.querySelector('.buttons').addEventListener('click',function(e){
+    const btn=e.target.closest('button');if(!btn)return;
+    const action=btn.dataset.action;
+    if(action==='digit')inputDigit(btn.dataset.value);
+    else if(action==='op')handleOp(btn.dataset.value);
+    else if(action==='equals')equals();
+    else if(action==='clear')clear();
+    else if(action==='delete')del();
+    else if(action==='percent')percent();
+  });
+
+  document.addEventListener('keydown',function(e){
+    if(e.key>='0'&&e.key<='9')inputDigit(e.key);
+    else if(e.key==='.')inputDigit('.');
+    else if(e.key==='+')handleOp('+');
+    else if(e.key==='-')handleOp('-');
+    else if(e.key==='*')handleOp('*');
+    else if(e.key==='/'){{e.preventDefault();handleOp('/');}}
+    else if(e.key==='Enter'||e.key==='=')equals();
+    else if(e.key==='Backspace')del();
+    else if(e.key==='Escape'||e.key==='c'||e.key==='C')clear();
+    else if(e.key==='%')percent();
+  });
+})();
+</script>
+</body>
+</html>
